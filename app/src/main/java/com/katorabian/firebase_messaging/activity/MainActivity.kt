@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -18,7 +19,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.messaging.FirebaseMessaging
 import com.katorabian.firebase_messaging.R
 import com.katorabian.firebase_messaging.databinding.ActivityMainBinding
 
@@ -39,6 +42,17 @@ class MainActivity : AppCompatActivity() {
 
         binding.switchPermission.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) askNotificationPermission()
+        }
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (task.isSuccessful) {
+                binding.tvToken.text = task.result
+                return@OnCompleteListener
+            }
+        })
+        binding.btCopyToken.setOnClickListener {
+            val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("token", binding.tvToken.text)
+            clipboard.setPrimaryClip(clip)
         }
     }
 
